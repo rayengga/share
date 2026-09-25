@@ -9,7 +9,22 @@ export function Header({ userName }: { userName: string }) {
   const { total } = useUnread();
 
   useEffect(() => {
-    document.title = total > 0 ? `(${total}) Shared Files` : "Shared Files";
+    const desired = total > 0 ? `(${total}) Shared Files` : "Shared Files";
+    document.title = desired;
+
+    // Next's App Router manages <title> declaratively from the static
+    // metadata export and can replace the whole <title> element (not just
+    // its text) on its own re-renders, silently overwriting our assignment
+    // above. Watch the entire <head> subtree and re-assert our value
+    // whenever that happens.
+    const observer = new MutationObserver(() => {
+      if (document.title !== desired) {
+        document.title = desired;
+      }
+    });
+    observer.observe(document.head, { childList: true, subtree: true, characterData: true });
+
+    return () => observer.disconnect();
   }, [total]);
 
   return (

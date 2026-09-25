@@ -4,6 +4,7 @@ import { del } from "@vercel/blob";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { categories, files } from "@/db/schema";
+import { isUniqueViolation } from "@/lib/utils";
 
 export async function PATCH(
   request: Request,
@@ -39,17 +40,27 @@ export async function PATCH(
     return NextResponse.json({ error: "Nothing to update." }, { status: 400 });
   }
 
-  const [updated] = await db
-    .update(categories)
-    .set(updates)
-    .where(eq(categories.id, categoryId))
-    .returning();
+  try {
+    const [updated] = await db
+      .update(categories)
+      .set(updates)
+      .where(eq(categories.id, categoryId))
+      .returning();
 
-  if (!updated) {
-    return NextResponse.json({ error: "Category not found." }, { status: 404 });
+    if (!updated) {
+      return NextResponse.json({ error: "Category not found." }, { status: 404 });
+    }
+
+    return NextResponse.json(updated);
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      return NextResponse.json(
+        { error: "A category with this name already exists." },
+        { status: 409 }
+      );
+    }
+    throw error;
   }
-
-  return NextResponse.json(updated);
 }
 
 export async function DELETE(

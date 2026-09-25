@@ -8,6 +8,13 @@
       "when": 1790350104726,
       "tag": "0000_secret_cerebro",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790355461611,
+      "tag": "0001_spotty_caretaker",
+      "breakpoints": true
     }
   ]
 }

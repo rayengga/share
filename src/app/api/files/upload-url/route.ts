@@ -22,12 +22,11 @@ export async function POST(request: Request) {
           addRandomSuffix: true,
         };
       },
-      onUploadCompleted: async () => {
-        // The client creates the database record itself via POST /api/files
-        // right after upload() resolves, so nothing to do here. This callback
-        // is a webhook that only fires reliably once the app is deployed
-        // (it needs a publicly reachable URL), so we don't depend on it.
-      },
+      // We intentionally don't pass onUploadCompleted: it's a webhook that
+      // needs a publicly reachable callback URL, which breaks the upload
+      // token on localhost. Our client creates the database record itself
+      // via POST /api/files right after upload() resolves, so we don't
+      // need this callback at all, locally or in production.
     });
 
     return NextResponse.json(jsonResponse);

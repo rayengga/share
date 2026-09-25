@@ -53,7 +53,7 @@ export function UploadArea({
 
         try {
           const blob = await upload(file.name, file, {
-            access: "public",
+            access: "private",
             handleUploadUrl: "/api/files/upload-url",
             onUploadProgress: ({ percentage }) => {
               setTasks((t) =>

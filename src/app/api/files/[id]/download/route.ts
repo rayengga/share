@@ -27,7 +27,9 @@ export async function GET(
 
   await db.insert(fileReads).values({ userId, fileId }).onConflictDoNothing();
 
-  const blobResponse = await fetch(file.blobUrl);
+  const blobResponse = await fetch(file.blobUrl, {
+    headers: { Authorization: `Bearer ${process.env.BLOB_READ_WRITE_TOKEN}` },
+  });
   if (!blobResponse.ok || !blobResponse.body) {
     return NextResponse.json({ error: "Could not retrieve the file." }, { status: 502 });
   }

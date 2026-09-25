@@ -18,7 +18,7 @@ export const users = pgTable("users", {
 
 export const categories = pgTable("categories", {
   id: serial("id").primaryKey(),
-  name: varchar("name", { length: 100 }).notNull(),
+  name: varchar("name", { length: 100 }).notNull().unique(),
   emoji: varchar("emoji", { length: 16 }),
   color: varchar("color", { length: 32 }),
   createdBy: integer("created_by").references(() => users.id, { onDelete: "set null" }),

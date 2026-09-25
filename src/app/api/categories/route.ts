@@ -3,6 +3,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { categories } from "@/db/schema";
 import { getCategoriesWithUnreadCounts } from "@/lib/data";
+import { isUniqueViolation } from "@/lib/utils";
 
 export async function GET() {
   const session = await auth();
@@ -32,10 +33,20 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Category name is too long." }, { status: 400 });
   }
 
-  const [created] = await db
-    .insert(categories)
-    .values({ name, emoji, color, createdBy: Number(session.user.id) })
-    .returning();
+  try {
+    const [created] = await db
+      .insert(categories)
+      .values({ name, emoji, color, createdBy: Number(session.user.id) })
+      .returning();
 
-  return NextResponse.json(created, { status: 201 });
+    return NextResponse.json(created, { status: 201 });
+  } catch (error) {
+    if (isUniqueViolation(error)) {
+      return NextResponse.json(
+        { error: "A category with this name already exists." },
+        { status: 409 }
+      );
+    }
+    throw error;
+  }
 }

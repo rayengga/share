@@ -10,7 +10,10 @@ export async function getCategoryById(categoryId: number) {
 export async function ensureDefaultCategory() {
   const existing = await db.select({ id: categories.id }).from(categories).limit(1);
   if (existing.length === 0) {
-    await db.insert(categories).values({ name: "General", emoji: "📁" });
+    // The unique constraint on categories.name + onConflictDoNothing makes this
+    // safe even if multiple requests race here concurrently (e.g. the layout
+    // and the page both check "is the table empty?" at the same time).
+    await db.insert(categories).values({ name: "General", emoji: "📁" }).onConflictDoNothing();
   }
 }
 
